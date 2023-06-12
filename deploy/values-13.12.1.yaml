@@ -1,0 +1,65 @@
+architecture: replicaset
+
+global:
+  namespaceOverride: mongodb
+
+useStatefulSet: true # mongodb requires persistence
+
+replicaCount: 3
+
+arbiter:
+  enabled: false
+
+## Persistence Configuration
+persistence:
+  enabled: true
+  storageClass: hostpath #set to work with docker desktop
+  accessMode: ReadWriteOnce
+  size: 10Gi # must be higher in reality
+
+## Probing
+readinessProbe:
+  initialDelaySeconds: 10
+  timeoutSeconds: 10
+
+livenessProbe:
+  initialDelaySeconds: 10
+  timeoutSeconds: 10
+
+# This is unsafe and only for demo purposes 
+auth:
+  rootPassword: "12345678"
+
+
+## Required for M1 MacBook
+tolerations:
+  - key: "node.kubernetes.io/memory-pressure"
+    operator: "Exists"
+    effect: "NoSchedule"
+
+## Resource Configuration
+resources:
+  requests:
+    memory: "1Gi"
+    cpu: "500m"
+  limits:
+    memory: "4Gi"
+    cpu: "1"
+
+## Tinkered affinty section to allow 3 pods on single node
+affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                  - docker-desktop
+
+terminationGracePeriodSeconds: 120
+
+# extraFlags:
+#   - "--electionTimeoutMillis=5000"
+#   - "--replSetAbortPrimaryCatchUp=true"
+#   - "--heartbeatIntervalMillis=500"
