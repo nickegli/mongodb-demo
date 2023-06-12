@@ -13,7 +13,7 @@ arbiter:
 ## Persistence Configuration
 persistence:
   enabled: true
-  storageClass: hostpath #set to work with docker desktop
+  storageClass: standard #set to work with docker desktop
   accessMode: ReadWriteOnce
   size: 10Gi # must be higher in reality
 
